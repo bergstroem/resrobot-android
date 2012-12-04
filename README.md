@@ -17,7 +17,7 @@ The constructor requires an API key which you can get from http://www.trafiklab.
 
 Example usage:
 
-ResrobotClient client = new ResrobotClient("YOUR_API_KEY");
+	ResrobotClient client = new ResrobotClient("YOUR_API_KEY");
 
 	client.search("7400001", "7400002", new Date(), false, new SearchCallback() {
 
