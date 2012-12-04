@@ -19,13 +19,13 @@ Example usage:
 
 ResrobotClient client = new ResrobotClient("YOUR_API_KEY");
 
-client.search("7400001", "7400002", new Date(), false, new SearchCallback() {
+	client.search("7400001", "7400002", new Date(), false, new SearchCallback() {
 
-	@Override
-	public void searchComplete(ArrayList<Route> result) {
-		//TODO: do something with the result.
-	}
-});
+		@Override
+		public void searchComplete(ArrayList<Route> result) {
+			//TODO: do something with the result.
+		}
+	});
 
 Methods
 -------
