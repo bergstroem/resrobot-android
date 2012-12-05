@@ -11,12 +11,12 @@ import java.net.URL;
 import android.os.AsyncTask;
 
 public class DownloadTask extends AsyncTask<URL, Integer, String> {
+	
 	public interface DownloadCompleteCallback{
 		public void downloadComplete(String result);
 	}
+	
 	private DownloadCompleteCallback downloadCompleteCallback;
-	private HttpURLConnection urlConnection = null;
-	String result = "";
 
 	public void setDownloadCompleteCallback(
 			DownloadCompleteCallback downloadCompleteCallback) {
@@ -25,7 +25,8 @@ public class DownloadTask extends AsyncTask<URL, Integer, String> {
 
 	@Override
 	protected String doInBackground(URL... urls) {
-		// TODO Auto-generated method stub
+		HttpURLConnection urlConnection = null;
+		String result = "";
 		try {
 			urlConnection = (HttpURLConnection) urls[0].openConnection();
 			

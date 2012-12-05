@@ -25,6 +25,7 @@ public class ResrobotClient {
 	private CoordSys coordSys = CoordSys.WGS84;
 	private boolean isSuper = false;
 	private String apiVersion = "2.1";
+	private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 	
 	public ResrobotClient(String key) {
 		this.key = key;
@@ -117,7 +118,6 @@ public class ResrobotClient {
 				"&fromId=" + fromId + "&toId=" + toId + "&arrival=" + arrival +
 				"&coordSys=" + coordSys.toString();
 		
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 		urlString += "&date=" + df.format(date);
 		df.applyPattern("HH:mm");
 		urlString += "&time=" + df.format(date);
@@ -141,7 +141,6 @@ public class ResrobotClient {
 				"&arrival=" + arrival + "&coordSys=" + coordSys.toString();
 		
 		if(date != null) {
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 			urlString += "&date=" + df.format(date);
 			df.applyPattern("HH:mm");
 			urlString += "&time=" + df.format(date);
