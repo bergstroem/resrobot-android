@@ -47,11 +47,6 @@ public class DownloadTask extends AsyncTask<URL, Integer, String> {
 		
 		return result;
 	}
-	
-	// This is called each time you call publishProgress()
-    protected void onProgressUpdate(Integer... progress) {
-        //setProgressPercent(progress[0]);
-    }
 
     // This is called when doInBackground() is finished
     protected void onPostExecute(String result) {
