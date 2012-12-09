@@ -16,7 +16,6 @@ import com.mattiasbergstrom.resrobot.DownloadTask.DownloadCompleteCallback;
 
 public class ResrobotClient {
 	
-	
 	public enum CoordSys {
 		WGS84, RT90
 	}
@@ -25,6 +24,8 @@ public class ResrobotClient {
 	private CoordSys coordSys = CoordSys.WGS84;
 	private boolean isSuper = false;
 	private String apiVersion = "2.1";
+	private SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+	private SimpleDateFormat timeFormater = new SimpleDateFormat("HH:mm", Locale.getDefault());
 	
 	public ResrobotClient(String key) {
 		this.key = key;
@@ -117,10 +118,8 @@ public class ResrobotClient {
 				"&fromId=" + fromId + "&toId=" + toId + "&arrival=" + arrival +
 				"&coordSys=" + coordSys.toString();
 		
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-		urlString += "&date=" + df.format(date);
-		df.applyPattern("HH:mm");
-		urlString += "&time=" + df.format(date);
+		urlString += "&date=" + dateFormater.format(date);
+		urlString += "&time=" + timeFormater.format(date);
 		
 		urlString += "&apiVersion=" + apiVersion;
 		try {
@@ -141,10 +140,8 @@ public class ResrobotClient {
 				"&arrival=" + arrival + "&coordSys=" + coordSys.toString();
 		
 		if(date != null) {
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-			urlString += "&date=" + df.format(date);
-			df.applyPattern("HH:mm");
-			urlString += "&time=" + df.format(date);
+			urlString += "&date=" + dateFormater.format(date);
+			urlString += "&time=" + timeFormater.format(date);
 		}
 		
 		urlString += "&apiVersion=" + apiVersion;

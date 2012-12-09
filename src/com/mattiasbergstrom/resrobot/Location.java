@@ -1,11 +1,16 @@
 package com.mattiasbergstrom.resrobot;
 
 import java.util.LinkedList;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Location {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Location implements Parcelable {
+	
 	private String name;
 	private Municipality municipality;
 	private int id;
@@ -32,6 +37,7 @@ public class Location {
 			
 			
 			JSONArray transports = jsonObject.optJSONArray("transportlist");
+			transportList = new LinkedList<TransportType>();
 			if(transports != null) {
 					for(int i = 0; i < transports.length(); i++) {
 						JSONObject obj = transports.getJSONObject(i);
@@ -39,6 +45,7 @@ public class Location {
 						transportList.add(type);
 				}
 			}
+			producerList = new LinkedList<Integer>();
 			JSONArray producers = jsonObject.optJSONArray("producerlist");
 			if(producers != null) {
 				for(int i = 0; i < producers.length(); i++) {
@@ -55,6 +62,29 @@ public class Location {
 		
 	}
 	
+	public Location(Parcel in) {
+		this.name = in.readString();
+		this.municipality = in.readParcelable(Municipality.class.getClassLoader());
+		this.id = in.readInt();
+		this.longitude = in.readDouble();
+		this.latitude = in.readDouble();
+		
+		Parcelable[] transportTypes = in.readParcelableArray(TransportType.class.getClassLoader());
+		this.transportList = new LinkedList<TransportType>();
+		for(int i = 0 ; i<transportTypes.length ; i++){
+			this.transportList.add((TransportType) transportTypes[i]);
+		}
+		
+		int[] producers = new int[in.readInt()];//read number of producers
+		in.readIntArray(producers);
+		this.producerList = new LinkedList<Integer>();
+		for(int i = 0 ; i<producers.length ; i++){
+			producerList.add(producers[i]);
+		}
+		
+		this.isBestMatch = in.readInt() > 0;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -86,4 +116,37 @@ public class Location {
 	public boolean isBestMatch() {
 		return isBestMatch;
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+	
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(name);
+		dest.writeParcelable(municipality, flags);
+		dest.writeInt(id);
+		dest.writeDouble(longitude);
+		dest.writeDouble(latitude);
+		dest.writeParcelableArray(transportList.toArray(new TransportType[transportList.size()]), flags);
+		int[] producers = new int[producerList.size()];
+		for(int i = 0;i<producerList.size();i++){
+			producers[i] = producerList.get(i);
+		}
+		dest.writeInt(producerList.size());
+		dest.writeIntArray(producers);
+		dest.writeInt(isBestMatch ? 1 : 0);
+	}
+
+	public static final Parcelable.Creator<Location> CREATOR = new Parcelable.Creator<Location>() {
+		public Location createFromParcel(Parcel in) {
+			return new Location(in);
+		}
+
+		public Location[] newArray(int size) {
+			return new Location[size];
+		}
+	};
+	
 }
