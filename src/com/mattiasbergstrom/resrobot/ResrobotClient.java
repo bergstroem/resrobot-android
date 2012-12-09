@@ -109,22 +109,29 @@ public class ResrobotClient {
 				try {
 					JSONObject jObject = (new JSONObject(result)
 							.getJSONObject("findlocationresult"));
+					
+					if(jObject.has("from")){ 
 
-					JSONArray fromLocationArr = jObject.optJSONObject("from")
-							.optJSONArray("location");
-					JSONArray toLocationArr = jObject.optJSONObject("to")
-							.optJSONArray("location");
+						JSONArray fromLocationArr = jObject.optJSONObject("from")
+								.optJSONArray("location");
 
-					for (int i = 0; i < fromLocationArr.length(); i++) {
-						Location loc = new Location(fromLocationArr
-								.getJSONObject(i));
-						fromLocations.add(loc);
+						for (int i = 0; i < fromLocationArr.length(); i++) {
+							Location loc = new Location(fromLocationArr
+									.getJSONObject(i));
+							fromLocations.add(loc);
+						}
 					}
+					
+					if(jObject.has("to")){ 
+						
+						JSONArray toLocationArr = jObject.optJSONObject("to")
+								.optJSONArray("location");
 
-					for (int i = 0; i < toLocationArr.length(); i++) {
-						Location loc = new Location(toLocationArr
-								.getJSONObject(i));
-						toLocations.add(loc);
+						for (int i = 0; i < toLocationArr.length(); i++) {
+							Location loc = new Location(toLocationArr
+									.getJSONObject(i));
+							toLocations.add(loc);
+						}
 					}
 
 					callback.findLocationComplete(fromLocations, toLocations);
@@ -236,6 +243,11 @@ public class ResrobotClient {
 				try {
 					jObject = new JSONObject(result);
 					jObject = jObject.getJSONObject("timetableresult");
+					
+					if(!jObject.has("ttitem")){ //return empty result list instead of crashing
+						callback.searchComplete(routes);
+						return;
+					}
 
 					JSONArray ttitems = jObject.getJSONArray("ttitem");
 
@@ -308,6 +320,11 @@ public class ResrobotClient {
 					try {
 						jObject = new JSONObject(result);
 						jObject = jObject.getJSONObject("stationsinzoneresult");
+						
+						if(!jObject.has("location")){ //return empty result list instead of crashing
+							callback.stationsInZoneComplete(locations);
+							return;
+						}
 
 						JSONArray arr = jObject.getJSONArray("location");
 						if (arr != null) {
