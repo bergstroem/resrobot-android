@@ -39,7 +39,7 @@ public class DownloadTask extends AsyncTask<URL, Integer, String> {
 			}
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			result = null;
 			e.printStackTrace();
 		} finally {
 			urlConnection.disconnect();
