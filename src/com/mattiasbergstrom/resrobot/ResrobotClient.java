@@ -11,6 +11,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Handler;
+
 import com.mattiasbergstrom.resrobot.DownloadTask.DownloadCompleteCallback;
 
 public class ResrobotClient {
@@ -77,7 +79,7 @@ public class ResrobotClient {
 
 			findLocation(url, callback, errorCallback);
 		} catch (MalformedURLException e) {
-			if(errorCallback!=null){
+			if (errorCallback != null) {
 				errorCallback.errorOccurred();
 			}
 			e.printStackTrace();
@@ -91,29 +93,36 @@ public class ResrobotClient {
 	public void findLocation(URL url, final FindLocationCallback callback,
 			final ErrorCallback errorCallback) {
 		DownloadTask task = new DownloadTask();
+		final Handler handler = new Handler();
 		task.setDownloadCompleteCallback(new DownloadCompleteCallback() {
 
 			@Override
 			public void downloadComplete(String result) {
-				
-				if(result == null){
-					if(errorCallback!=null){
-						errorCallback.errorOccurred();
+
+				if (result == null) {
+					if (errorCallback != null) {
+						handler.post(new Runnable() {
+
+							@Override
+							public void run() {
+								errorCallback.errorOccurred();
+							}
+						});
 					}
 					return;
 				}
-				
-				ArrayList<Location> fromLocations = new ArrayList<Location>();
-				ArrayList<Location> toLocations = new ArrayList<Location>();
+
+				final ArrayList<Location> fromLocations = new ArrayList<Location>();
+				final ArrayList<Location> toLocations = new ArrayList<Location>();
 
 				try {
 					JSONObject jObject = (new JSONObject(result)
 							.getJSONObject("findlocationresult"));
-					
-					if(jObject.has("from")){ 
 
-						JSONArray fromLocationArr = jObject.optJSONObject("from")
-								.optJSONArray("location");
+					if (jObject.has("from")) {
+
+						JSONArray fromLocationArr = jObject.optJSONObject(
+								"from").optJSONArray("location");
 
 						for (int i = 0; i < fromLocationArr.length(); i++) {
 							Location loc = new Location(fromLocationArr
@@ -121,9 +130,9 @@ public class ResrobotClient {
 							fromLocations.add(loc);
 						}
 					}
-					
-					if(jObject.has("to")){ 
-						
+
+					if (jObject.has("to")) {
+
 						JSONArray toLocationArr = jObject.optJSONObject("to")
 								.optJSONArray("location");
 
@@ -134,10 +143,23 @@ public class ResrobotClient {
 						}
 					}
 
-					callback.findLocationComplete(fromLocations, toLocations);
+					handler.post(new Runnable() {
+
+						@Override
+						public void run() {
+							callback.findLocationComplete(fromLocations,
+									toLocations);
+						}
+					});
 				} catch (JSONException e) {
-					if(errorCallback!=null){
-						errorCallback.errorOccurred();
+					if (errorCallback != null) {
+						handler.post(new Runnable() {
+
+							@Override
+							public void run() {
+								errorCallback.errorOccurred();
+							}
+						});
 					}
 					e.printStackTrace();
 				}
@@ -180,7 +202,7 @@ public class ResrobotClient {
 			search(new URL(urlString), callback, errorCallback);
 
 		} catch (MalformedURLException e) {
-			if(errorCallback!=null){
+			if (errorCallback != null) {
 				errorCallback.errorOccurred();
 			}
 			e.printStackTrace();
@@ -211,7 +233,7 @@ public class ResrobotClient {
 		try {
 			search(new URL(urlString), callback, errorCallback);
 		} catch (MalformedURLException e) {
-			if(errorCallback!=null){
+			if (errorCallback != null) {
 				errorCallback.errorOccurred();
 			}
 			e.printStackTrace();
@@ -225,27 +247,41 @@ public class ResrobotClient {
 	public void search(URL url, final SearchCallback callback,
 			final ErrorCallback errorCallback) {
 		DownloadTask task = new DownloadTask();
+		final Handler handler = new Handler();
 		task.setDownloadCompleteCallback(new DownloadCompleteCallback() {
 
 			@Override
 			public void downloadComplete(String result) {
-				
-				if(result == null){
-					if(errorCallback!=null){
-						errorCallback.errorOccurred();
+
+				if (result == null) {
+					if (errorCallback != null) {
+						handler.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								errorCallback.errorOccurred();
+							}
+						});
 					}
 					return;
 				}
-				
-				ArrayList<Route> routes = new ArrayList<Route>();
+
+				final ArrayList<Route> routes = new ArrayList<Route>();
 
 				JSONObject jObject;
 				try {
 					jObject = new JSONObject(result);
 					jObject = jObject.getJSONObject("timetableresult");
-					
-					if(!jObject.has("ttitem")){ //return empty result list instead of crashing
-						callback.searchComplete(routes);
+
+					if (!jObject.has("ttitem")) { // return empty result list
+													// instead of crashing
+						handler.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								callback.searchComplete(routes);
+							}
+						});
 						return;
 					}
 
@@ -275,11 +311,23 @@ public class ResrobotClient {
 						routes.add(route);
 					}
 
-					callback.searchComplete(routes);
+					handler.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							callback.searchComplete(routes);
+						}
+					});
 
 				} catch (JSONException e) {
-					if(errorCallback!=null){
-						errorCallback.errorOccurred();
+					if (errorCallback != null) {
+						handler.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								errorCallback.errorOccurred();
+							}
+						});
 					}
 					e.printStackTrace();
 				}
@@ -303,26 +351,41 @@ public class ResrobotClient {
 					+ "&centerX=" + centerX + "&centerY=" + centerY
 					+ "&radius=" + radius + "&coordSys=" + coordSys.toString());
 			DownloadTask task = new DownloadTask();
+			final Handler handler = new Handler();
 			task.setDownloadCompleteCallback(new DownloadCompleteCallback() {
 
 				@Override
 				public void downloadComplete(String result) {
-					
-					if(result == null){
-						if(errorCallback!=null){
-							errorCallback.errorOccurred();
+
+					if (result == null) {
+						if (errorCallback != null) {
+							handler.post(new Runnable() {
+								
+								@Override
+								public void run() {
+									errorCallback.errorOccurred();
+								}
+							});
 						}
 						return;
 					}
-					
-					ArrayList<Location> locations = new ArrayList<Location>();
+
+					final ArrayList<Location> locations = new ArrayList<Location>();
 					JSONObject jObject;
 					try {
 						jObject = new JSONObject(result);
 						jObject = jObject.getJSONObject("stationsinzoneresult");
-						
-						if(!jObject.has("location")){ //return empty result list instead of crashing
-							callback.stationsInZoneComplete(locations);
+
+						if (!jObject.has("location")) { // return empty result
+														// list instead of
+														// crashing
+							handler.post(new Runnable() {
+								
+								@Override
+								public void run() {
+									callback.stationsInZoneComplete(locations);
+								}
+							});
 							return;
 						}
 
@@ -339,10 +402,23 @@ public class ResrobotClient {
 							locations.add(loc);
 						}
 
-						callback.stationsInZoneComplete(locations);
+						handler.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								callback.stationsInZoneComplete(locations);
+							}
+						});
 					} catch (JSONException e) {
-						if(errorCallback!=null){
-							errorCallback.errorOccurred();
+						if (errorCallback != null) {
+
+							handler.post(new Runnable() {
+								
+								@Override
+								public void run() {
+									errorCallback.errorOccurred();
+								}
+							});
 						}
 						e.printStackTrace();
 					}
@@ -351,7 +427,7 @@ public class ResrobotClient {
 
 			task.execute(url);
 		} catch (MalformedURLException e) {
-			if(errorCallback!=null){
+			if (errorCallback != null) {
 				errorCallback.errorOccurred();
 			}
 			e.printStackTrace();

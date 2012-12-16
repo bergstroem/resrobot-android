@@ -10,7 +10,7 @@ import java.net.URL;
 
 import android.os.AsyncTask;
 
-public class DownloadTask extends AsyncTask<URL, Integer, String> {
+public class DownloadTask extends AsyncTask<URL, Void, Void> {
 	
 	public interface DownloadCompleteCallback{
 		public void downloadComplete(String result);
@@ -24,7 +24,7 @@ public class DownloadTask extends AsyncTask<URL, Integer, String> {
 	}
 
 	@Override
-	protected String doInBackground(URL... urls) {
+	protected Void doInBackground(URL... urls) {
 		HttpURLConnection urlConnection = null;
 		String result = "";
 		try {
@@ -45,12 +45,13 @@ public class DownloadTask extends AsyncTask<URL, Integer, String> {
 			urlConnection.disconnect();
 		}
 		
-		return result;
+    	downloadCompleteCallback.downloadComplete(result);
+		
+		return null;
 	}
 
     // This is called when doInBackground() is finished
-    protected void onPostExecute(String result) {
-    	downloadCompleteCallback.downloadComplete(result);
+    protected void onPostExecute(Void result) {
         //showNotification("Downloaded " + result + " bytes");
     }
 }
