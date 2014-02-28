@@ -11,7 +11,9 @@ Usage
 
 First you must create an instance of the ResrobotClient. This is the object you use to make the API calls. 
 
+```java
 ResrobotClient client = new ResrobotClient("YOUR_API_KEY");
+```
 
 The constructor requires an API key which you can get from http://www.trafiklab.se/api/resrobot-sok-resa
 
