@@ -1,7 +1,9 @@
 package com.mattiasbergstrom.resrobot;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Handler;
+import android.util.Log;
 
 import com.mattiasbergstrom.resrobot.DownloadTask.DownloadCompleteCallback;
 
@@ -22,6 +25,7 @@ public class ResrobotClient {
 	}
 
 	private String key = "";
+	private String departuresKey = "";
 	private CoordSys coordSys = CoordSys.WGS84;
 	private boolean isSuper = false;
 	private String apiVersion = "2.1";
@@ -31,7 +35,12 @@ public class ResrobotClient {
 			Locale.getDefault());
 
 	public ResrobotClient(String key) {
+		this(key, "");
+	}
+	
+	public ResrobotClient(String key, String departuresKey) {
 		this.key = key;
+		this.departuresKey = departuresKey;
 	}
 
 	/* Interfaces */
@@ -51,6 +60,10 @@ public class ResrobotClient {
 	public interface ErrorCallback {
 		public void errorOccurred();
 	}
+	
+	public interface DeparturesCallback {
+		public void departuresComplete(ArrayList<RouteSegment> result);
+	}
 
 	/* Private methods */
 
@@ -59,6 +72,14 @@ public class ResrobotClient {
 			return "https://api.trafiklab.se/samtrafiken/resrobotsuper";
 		else
 			return "https://api.trafiklab.se/samtrafiken/resrobot";
+	}
+	
+	private String getDeparturesUrl() {
+		if(isSuper) {
+			return "https://api.trafiklab.se/samtrafiken/resrobotstops";
+		} else {
+			return "https://api.trafiklab.se/samtrafiken/resrobotstopssuper";
+		}
 	}
 
 	/* Public methods */
@@ -71,14 +92,20 @@ public class ResrobotClient {
 	public void findLocation(String from, String to,
 			final FindLocationCallback callback,
 			final ErrorCallback errorCallback) {
-
+		
 		try {
-			URL url = new URL(getUrl() + "/FindLocation.json?key=" + this.key
-					+ "&from=" + from + "&to=" + to + "&coordSys="
-					+ coordSys.toString() + "&apiVersion=" + apiVersion);
+			URL url;
+			url = new URL(getUrl() + "/FindLocation.json?key=" + this.key
+						+ "&from=" + URLEncoder.encode(from, "UTF-8") + "&to=" + URLEncoder.encode(to, "UTF-8") + "&coordSys="
+						+ coordSys.toString() + "&apiVersion=" + apiVersion);
 
 			findLocation(url, callback, errorCallback);
 		} catch (MalformedURLException e) {
+			if (errorCallback != null) {
+				errorCallback.errorOccurred();
+			}
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
 			if (errorCallback != null) {
 				errorCallback.errorOccurred();
 			}
@@ -124,10 +151,12 @@ public class ResrobotClient {
 						JSONArray fromLocationArr = jObject.optJSONObject(
 								"from").optJSONArray("location");
 
-						for (int i = 0; i < fromLocationArr.length(); i++) {
-							Location loc = new Location(fromLocationArr
-									.getJSONObject(i));
-							fromLocations.add(loc);
+						if(fromLocationArr != null) {
+							for (int i = 0; i < fromLocationArr.length(); i++) {
+								Location loc = new Location(fromLocationArr
+										.getJSONObject(i));
+								fromLocations.add(loc);
+							}
 						}
 					}
 
@@ -136,10 +165,12 @@ public class ResrobotClient {
 						JSONArray toLocationArr = jObject.optJSONObject("to")
 								.optJSONArray("location");
 
-						for (int i = 0; i < toLocationArr.length(); i++) {
-							Location loc = new Location(toLocationArr
-									.getJSONObject(i));
-							toLocations.add(loc);
+						if(toLocationArr != null) {
+							for (int i = 0; i < toLocationArr.length(); i++) {
+								Location loc = new Location(toLocationArr
+										.getJSONObject(i));
+								toLocations.add(loc);
+							}
 						}
 					}
 
@@ -433,8 +464,110 @@ public class ResrobotClient {
 			e.printStackTrace();
 		}
 	}
+	
+	public void departures(int locationId, int timeSpan,
+			final DeparturesCallback callback) {
+		departures(locationId, timeSpan, callback, null);
+	}
+	
+	public void departures(int locationId, int timeSpan,
+			final DeparturesCallback callback,
+			final ErrorCallback errorCallback) {
+		URL url;
+		try {
+			url = new URL(getDeparturesUrl() + "/GetDepartures.json?key=" + this.departuresKey
+					+ "&locationId=" + String.valueOf(locationId) + "&apiVersion=2.2"
+					+ "&timeSpan=" + timeSpan + "&coordSys=" + coordSys.toString());
+			
+			DownloadTask task = new DownloadTask();
+			final Handler handler = new Handler();
+			
+			task.setDownloadCompleteCallback(new DownloadCompleteCallback() {
+
+				@Override
+				public void downloadComplete(String result) {
+
+					if (result == null) {
+						if (errorCallback != null) {
+							handler.post(new Runnable() {
+								
+								@Override
+								public void run() {
+									errorCallback.errorOccurred();
+								}
+							});
+						}
+						return;
+					}
+
+					final ArrayList<RouteSegment> departures = new ArrayList<RouteSegment>();
+					JSONObject jObject;
+					try {
+						jObject = new JSONObject(result);
+						jObject = jObject.getJSONObject("getdeparturesresult");
+
+						if (!jObject.has("departuresegment")) { // return empty result
+														// list instead of
+														// crashing
+							handler.post(new Runnable() {
+								
+								@Override
+								public void run() {
+									callback.departuresComplete(departures);
+								}
+							});
+							return;
+						}
+
+						
+						JSONArray arr = jObject.getJSONArray("departuresegment");
+						if (arr != null) {
+							for (int i = 0; i < arr.length(); i++) {
+								RouteSegment departure = new RouteSegment(arr
+										.getJSONObject(i));
+								departures.add(departure);
+							}
+						}
+
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+								callback.departuresComplete(departures);
+							}
+						});
+					} catch (JSONException e) {
+						if (errorCallback != null) {
+
+							handler.post(new Runnable() {
+								
+								@Override
+								public void run() {
+									errorCallback.errorOccurred();
+								}
+							});
+						}
+						e.printStackTrace();
+					}
+				}
+			});
+			task.execute(url);
+		} catch (MalformedURLException e) {
+			if (errorCallback != null) {
+				errorCallback.errorOccurred();
+			}
+			e.printStackTrace();
+		}
+	}
 
 	/* Getters and setters */
+
+	public String getDeparturesKey() {
+		return departuresKey;
+	}
+
+	public void setDeparturesKey(String departuresKey) {
+		this.departuresKey = departuresKey;
+	}
 
 	public boolean isSuper() {
 		return isSuper;

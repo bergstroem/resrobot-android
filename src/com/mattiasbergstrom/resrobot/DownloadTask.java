@@ -31,8 +31,8 @@ public class DownloadTask extends AsyncTask<URL, Void, Void> {
 			urlConnection = (HttpURLConnection) urls[0].openConnection();
 			
 			InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-			//readStream(in);
-			BufferedReader inReader = new BufferedReader(new InputStreamReader(in));
+			
+			BufferedReader inReader = new BufferedReader(new InputStreamReader(in, "ISO-8859-1"));
 			String line = null;
 			while((line = inReader.readLine()) != null) {
 				result += line;

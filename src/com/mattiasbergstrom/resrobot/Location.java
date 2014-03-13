@@ -27,6 +27,10 @@ public class Location implements Parcelable {
 			latitude = jsonObject.optDouble("@y");
 			id = jsonObject.optInt("@id");
 			
+			if(id == 0) {
+				id = jsonObject.optInt("locationid");
+			}
+			
 			// Try getting display name first, otherwise name
 			name = jsonObject.optString("displayname");
 			

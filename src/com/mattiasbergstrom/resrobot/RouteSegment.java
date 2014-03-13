@@ -17,7 +17,9 @@ public class RouteSegment implements Parcelable {
 		try {
 			segmentId = new RouteSegmentId(jsonObject.getJSONObject("segmentid"));
 			departure = new RouteSegmentEnd(jsonObject.getJSONObject("departure"));
-			arrival = new RouteSegmentEnd(jsonObject.getJSONObject("arrival"));
+			if(jsonObject.has("arrival")) {
+				arrival = new RouteSegmentEnd(jsonObject.getJSONObject("arrival"));
+			}
 			direction = jsonObject.optString("direction");
 		} catch (JSONException e) {
 			e.printStackTrace();
