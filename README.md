@@ -3,7 +3,7 @@ Resrobot
 
 Resrobot is an API-wrapper for Android, although it should be usable in a regular Java applications too. This wrapper doesn't contain all the available API-calls at this moment. Only Search, StationsInZone and FindLocation is implemented.
 
-Documentation for the API (not the wrapper) can be found here: http://www.trafiklab.se/api/resrobot-sok-resa
+Documentation for the API (not the wrapper) can be found here: http://www.trafiklab.se/api/resrobot-sok-resa.
 
 
 Usage
