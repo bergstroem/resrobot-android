@@ -15,7 +15,7 @@ First you must create an instance of the ResrobotClient. This is the object you 
 ResrobotClient client = new ResrobotClient("YOUR_API_KEY");
 ```
 
-The constructor requires an API key which you can get from http://www.trafiklab.se/api/resrobot-sok-resa
+The constructor requires an API key which you can get from http://www.trafiklab.se/api/resrobot-sok-resa.
 
 Example usage:
 ```java
@@ -29,8 +29,16 @@ client.search("7400001", "7400002", new Date(), false, new SearchCallback() {
 	}
 });
 ```
+###Departures API (optional)
+For some reason getting departures from the resrobot service has been separated into another API, this means a second API key is needed to get departures. You can get this API key from http://www.trafiklab.se/api/resrobot-stolptidtabeller. The departures API key should be provided as a second parameter to the ResrobotClient constructor.
+
+```java
+ResrobotClient client = new ResrobotClient("YOUR_API_KEY", "YOUR_DEPARTURES_API_KEY");
+```
+
 Methods
 -------
+All methods have overloads that take a an error callback as a last parameter.
 ```java
 public void findLocation(String from, String to, final FindLocationCallback callback);
 ```
@@ -48,20 +56,7 @@ public void stationsInZone(double centerX, double centerY, int radius, final Sta
 ```
 Finds the stations within the radius of the specified coordinates.
 
-License
--------
-
-    Copyright 2012 Mattias Bergström
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
+```java
+public void departures(int locationId, int timeSpan, final DeparturesCallback callback);
+```
+Finds departures from the specified locationId. (Needs a second API key, see Usage). 
