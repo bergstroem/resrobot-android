@@ -520,14 +520,26 @@ public class ResrobotClient {
 						}
 
 						
-						JSONArray arr = jObject.getJSONArray("departuresegment");
-						if (arr != null) {
-							for (int i = 0; i < arr.length(); i++) {
-								RouteSegment departure = new RouteSegment(arr
-										.getJSONObject(i));
-								departures.add(departure);
-							}
-						}
+						//Since the response is either an array or object depending on the result
+                        //contains one or more departures, we need to try parse as Array and if no avail
+                        //parse the result as object instead
+                        try {
+                            JSONArray arr = jObject.getJSONArray("departuresegment");
+                            if (arr != null) {
+                                for (int i = 0; i < arr.length(); i++) {
+                                    RouteSegment departure = new RouteSegment(arr
+                                            .getJSONObject(i));
+                                    departures.add(departure);
+                                }
+                            }
+                        }
+                        catch (Exception ex){
+                            JSONObject obj = jObject.getJSONObject("departuresegment");
+                            if (obj != null) {
+                                RouteSegment departure = new RouteSegment(obj);
+                                departures.add(departure);
+                            }
+                        }
 
 						handler.post(new Runnable() {
 							@Override
